@@ -12,6 +12,8 @@ authors=[
 ]
 dependencies = [
     "click",
+    "numpy",
+    "scipy",
 ]
 requires-python = ">=3.6"
 
