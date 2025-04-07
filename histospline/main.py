@@ -11,9 +11,18 @@ def make_some_data(loc=0, scale=1, N=10_000):
 
 X = make_some_data()
 X = np.sort(X)
-Y = np.arange(1, len(X) + 1) / len(X)
 
-spline = UnivariateSpline(X, Y, k=2, s=0.01, ext=0)
+N = 10000
+
+X_centiles = np.quantile(X, np.linspace(0, 1, N + 1))
+Y_centiles = np.arange(1, len(X_centiles) + 1) / len(X_centiles)
+
+
+plt.scatter(X_centiles, Y_centiles)
+plt.show()
+
+# spline = UnivariateSpline(X_centiles, Y_centiles, k=2, s=0.01, ext=0)
+spline = CubicSpline(X_centiles, Y_centiles, bc_type=((2, 0), (2, 0)))
 d_spline = spline.derivative()
 
 
@@ -61,41 +70,28 @@ plt.show()
 # plt.show()
 
 
-# # Create linear spline interpolation function
-# linear_interp = interp1d(x, y, kind='quadratic', fill_value="extrapolate")
+# Create linear spline interpolation function
+linear_interp = interp1d(X_centiles, Y_centiles, kind="linear", fill_value=(0, 1))
 
-# # Compute slopes (derivatives) between consecutive data points
-# slopes = np.diff(y) / np.diff(x)
+# Compute slopes (derivatives) between consecutive data points
+slopes = np.diff(Y_centiles) / np.diff(X_centiles)
+density = interp1d(
+    X_centiles[:-1], slopes, kind="linear", fill_value=(0, 0), bounds_error=False
+)
 
-# # Function to evaluate the derivative at any point
-# def linear_spline_derivative(x_eval):
-#     # Ensure x_eval is an array for consistent processing
-#     x_eval = np.atleast_1d(x_eval)
-#     derivatives = np.zeros_like(x_eval, dtype=float)
-#     for i, val in enumerate(x_eval):
-#         # Find the segment index where x_eval[i] belongs
-#         segment_index = np.searchsorted(x, val) - 1
-#         # Handle boundary cases
-#         if segment_index < 0:
-#             segment_index = 0
-#         elif segment_index >= len(slopes):
-#             segment_index = len(slopes) - 1
-#         # Assign the corresponding slope
-#         derivatives[i] = slopes[segment_index]
-#     return derivatives
 
-# # Points to evaluate
-# x_eval = np.linspace(0, 5, 100)
-# y_eval = linear_interp(x_eval)
-# y_deriv = linear_spline_derivative(x_eval)
+# Points to evaluate
+x_eval = np.linspace(X_centiles[0], X_centiles[-1], 1000)
+y_eval = linear_interp(x_eval)
+y_deriv = density(x_eval)
 
-# # Plotting
-# plt.figure(figsize=(10, 6))
-# plt.plot(x, y, 'o', label='Data Points')
-# plt.plot(x_eval, y_eval, '-', label='Linear Spline')
-# plt.plot(x_eval, y_deriv, '--', label='Derivative of Linear Spline')
-# plt.xlabel('x')
-# plt.ylabel('y')
-# plt.legend()
-# plt.title('Linear Spline and Its Derivative')
-# plt.show()
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(X_centiles, Y_centiles, "o", label="Data Points")
+plt.plot(x_eval, y_eval, "-", label="Linear Spline")
+plt.plot(x_eval, y_deriv, "--", label="Derivative of Linear Spline")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.legend()
+plt.title("Linear Spline and Its Derivative")
+plt.show()
