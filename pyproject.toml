@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools >= 64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="histospline"
+version="0.0.1"
+description="SHORT DESC."
+readme="README.md"
+authors=[
+    {name="MatteoLacki",email="matteo.lacki@gmail.com"},
+]
+dependencies = [
+    "click",
+]
+requires-python = ">=3.6"
+
+
+[project.scripts]
+example_shell_script = "histospline.cli.example_shell_script:example_shell_script"
+
+[project.urls]
+homepage="https://github.com/MatteoLacki/histospline.git"
+repository="https://github.com/MatteoLacki/histospline.git"
+
+[tool.uv]
+reinstall-package = ["histospline"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
